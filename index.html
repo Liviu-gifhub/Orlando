@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orlando Furioso Ai</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Homepage Styles */
+        .homepage {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+            background: #000;
+            opacity: 1;
+            transform: translateX(0);
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .homepage.slide-out {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .category-card {
+            background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .category-card:hover::before {
+            left: 100%;
+        }
+
+        .category-card:hover {
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .category-content {
+            text-align: center;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .category-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .category-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .category-description {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        /* Detail Page Styles */
+        .detail-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .detail-page.active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .detail-header {
+            padding: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .detail-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            height: calc(100vh - 140px);
+            gap: 20px;
+            padding: 20px;
+            background: #000;
+        }
+
+        .media-item {
+            background: #1a1a1a;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .media-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .media-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Specific image positions */
+        .media-item img[src*="AstolfoFurioso.jpg"] {
+            object-position: center 10%;
+        }
+
+        .media-item img[src*="AstolfoLuna.jpg"] {
+            object-position: center 15%;
+        }
+
+        .media-item img[src*="Mosaico.jpg"] {
+            object-position: center 15%;
+        }
+
+        .media-item img[src*="CastelloCartoon.jpg"] {
+            object-position: center 30%;
+        }
+
+        .media-item img[src*="DarkFantasie.jpg"] {
+            object-position: center;
+        }
+
+        .media-item img[src*="OrlandoShock.jpg"] {
+            object-position: center 40%;
+        }
+
+        .media-item img[src*="AngelicaGangBang.jpg"] {
+            object-position: center 30%;
+        }
+
+        .media-item img[src*="FugaAngelicaRealistica.jpg"] {
+            object-position: center 30%;
+        }
+
+        .media-item img[src*="MosaicoFuga.jpg"] {
+            object-position: center 30%;
+        }
+
+        .media-item img[src*="RabbiaAlberi.jpg"] {
+            object-position: center;
+        }
+
+        .media-item img[src*="RabbiaPastello.jpg"] {
+            object-position: center 25%;
+        }
+
+        .media-item img[src*="RabbiaRealistica.jpg"] {
+            object-position: center 35%;
+        }
+
+        .media-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .media-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-overlay:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .play-icon {
+            color: white;
+            font-size: 2rem;
+            margin-left: 5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .homepage {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .category-content {
+                padding: 20px;
+            }
+
+            .category-icon {
+                font-size: 2.5rem;
+            }
+
+            .category-title {
+                font-size: 1.5rem;
+            }
+
+            .category-description {
+                font-size: 1rem;
+            }
+
+            .media-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                gap: 15px;
+                padding: 15px;
+                height: calc(100vh - 120px);
+            }
+
+            .detail-header {
+                padding: 20px;
+            }
+
+            .detail-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Fullscreen Video Styles */
+        .fullscreen-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fullscreen-video video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+        }
+
+        /* Fullscreen Image Styles */
+        .fullscreen-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .fullscreen-image img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Homepage -->
+        <div class="homepage" id="homepage">
+            <div class="category-card" data-category="fotografia">
+                <div class="category-content">
+                    <span class="category-icon">🌙</span>
+                    <h2 class="category-title">ASTOLFO SULLA LUNA</h2>
+                    <p class="category-description">Astolfo viaggia sulla Luna con l'ippogrifo per recuperare il senno perduto di Orlando, conservato in un'ampolla da Dio.</p>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="video">
+                <div class="category-content">
+                    <span class="category-icon">😡</span>
+                    <h2 class="category-title">FURIA DI ORLANDO</h2>
+                    <p class="category-description">Impazzito per amore di Angelica, Orlando distrugge tutto ciò che trova in una furia cieca e disumana.</p>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="design">
+                <div class="category-content">
+                    <span class="category-icon">🏰</span>
+                    <h2 class="category-title">CASTELLO DI ATLANTE</h2>
+                    <p class="category-description">Un castello magico creato dall'incantatore Atlante per confondere e imprigionare i cavalieri attraverso illusioni.</p>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="musica">
+                <div class="category-content">
+                    <span class="category-icon">👩🏻</span>
+                    <h2 class="category-title">FUGA DI ANGELICA</h2>
+                    <p class="category-description">Angelica, inseguita da numerosi cavalieri innamorati, fugge continuamente usando astuzia e magia per sfuggire ai suoi pretendenti.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Pages -->
+        <div class="detail-page" id="detail-fotografia">
+            <div class="detail-header">
+                <button class="back-button" onclick="goBack()">← Indietro</button>
+                <h1 class="detail-title">Astolfo sulla Luna</h1>
+            </div>
+            <div class="media-grid">
+                <div class="media-item">
+                    <img src="AstolfoSullaLuna/Mosaico.jpg" alt="Astolfo sulla Luna">
+                </div>
+                <div class="media-item">
+                    <img src="AstolfoSullaLuna/AstolfoLuna.jpg" alt="Astolfo Furioso">
+                </div>
+                <div class="media-item">
+                    <img src="AstolfoSullaLuna/AstolfoFurioso.jpg" alt="Mosaico">
+                </div>
+                <div class="media-item video-item" onclick="playVideo(this)">
+                    <video>
+                        <source src="video/AstolfoSullaLuna.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-overlay">
+                        <span class="play-icon">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-page" id="detail-video">
+            <div class="detail-header">
+                <button class="back-button" onclick="goBack()">← Indietro</button>
+                <h1 class="detail-title">FURIA DI ORLANDO</h1>
+            </div>
+            <div class="media-grid">
+                <div class="media-item">
+                    <img src="FuriaDiOrlando/RabbiaPastello.jpg" alt="Rabbia Realistica">
+                </div>
+                <div class="media-item">
+                    <img src="FuriaDiOrlando/RabbiaRealistica.jpg" alt="Rabbia Pastello">
+                </div>
+                <div class="media-item">
+                    <img src="FuriaDiOrlando/RabbiaAlberi.jpg" alt="Rabbia Alberi">
+                </div>
+                <div class="media-item video-item" onclick="playVideo(this)">
+                    <video>
+                        <source src="video/IraDiOrlando.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-overlay">
+                        <span class="play-icon">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-page" id="detail-design">
+            <div class="detail-header">
+                <button class="back-button" onclick="goBack()">← Indietro</button>
+                <h1 class="detail-title">CASTELLO DI ATLANTE</h1>
+            </div>
+            <div class="media-grid">
+                <div class="media-item">
+                    <img src="CastelloDiAtalante/CastelloCartoon.jpg" alt="Castello Cartoon">
+                </div>
+                <div class="media-item">
+                    <img src="CastelloDiAtalante/OrlandoShock.jpg" alt="Orlando Shock">
+                </div>
+                <div class="media-item">
+                    <img src="CastelloDiAtalante/DarkFantasie.jpg" alt="Dark Fantasie">
+                </div>
+                <div class="media-item video-item" onclick="playVideo(this)">
+                    <video>
+                        <source src="video/CastelloDiAtlante.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-overlay">
+                        <span class="play-icon">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-page" id="detail-musica">
+            <div class="detail-header">
+                <button class="back-button" onclick="goBack()">← Indietro</button>
+                <h1 class="detail-title">FUGA DI ANGELICA</h1>
+            </div>
+            <div class="media-grid">
+                <div class="media-item">
+                    <img src="FugaDiAngelica/MosaicoFuga.jpg" alt="Fuga Angelica Realistica">
+                </div>
+                <div class="media-item">
+                    <img src="FugaDiAngelica/AngelicaGangBang.jpg" alt="Mosaico Fuga">
+                </div>
+                <div class="media-item">
+                    <img src="FugaDiAngelica/FugaAngelicaRealistica.jpg" alt="Angelica Gang Bang">
+                </div>
+                <div class="media-item video-item" onclick="playVideo(this)">
+                    <video>
+                        <source src="video/LaFugaDiAngelica.mp4" type="video/mp4">
+                    </video>
+                    <div class="video-overlay">
+                        <span class="play-icon">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 'homepage';
+        let isTransitioning = false;
+
+        // Initialize the site
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryCards = document.querySelectorAll('.category-card');
+            const mediaItems = document.querySelectorAll('.media-item');
+            
+            categoryCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    if (isTransitioning) return;
+                    
+                    const category = this.getAttribute('data-category');
+                    showDetailPage(category);
+                });
+            });
+
+            // Add click event for images
+            mediaItems.forEach(item => {
+                const img = item.querySelector('img');
+                if (img) {
+                    item.addEventListener('click', function() {
+                        showFullscreenImage(img.src);
+                    });
+                }
+            });
+        });
+
+        function showFullscreenImage(src) {
+            const fullscreenContainer = document.createElement('div');
+            fullscreenContainer.className = 'fullscreen-image';
+            
+            const fullscreenImg = document.createElement('img');
+            fullscreenImg.src = src;
+            
+            fullscreenContainer.appendChild(fullscreenImg);
+            document.body.appendChild(fullscreenContainer);
+            
+            // Exit fullscreen when clicking anywhere
+            fullscreenContainer.addEventListener('click', function() {
+                fullscreenContainer.remove();
+            });
+            
+            // Exit fullscreen with ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    fullscreenContainer.remove();
+                }
+            });
+        }
+
+        function showDetailPage(category) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const homepage = document.getElementById('homepage');
+            const detailPage = document.getElementById(`detail-${category}`);
+            
+            // Slide out homepage
+            homepage.classList.add('slide-out');
+            
+            // Show detail page after homepage slides out
+            setTimeout(() => {
+                detailPage.classList.add('active');
+                currentPage = category;
+                isTransitioning = false;
+            }, 300);
+        }
+
+        function goBack() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const homepage = document.getElementById('homepage');
+            const currentDetailPage = document.getElementById(`detail-${currentPage}`);
+            
+            // Slide out detail page
+            currentDetailPage.classList.remove('active');
+            
+            // Show homepage after detail page slides out
+            setTimeout(() => {
+                homepage.classList.remove('slide-out');
+                currentPage = 'homepage';
+                isTransitioning = false;
+            }, 300);
+        }
+
+        function playVideo(element) {
+            const video = element.querySelector('video');
+            const overlay = element.querySelector('.video-overlay');
+            
+            if (video) {
+                // Create fullscreen container
+                const fullscreenContainer = document.createElement('div');
+                fullscreenContainer.className = 'fullscreen-video';
+                
+                // Clone the video element
+                const fullscreenVideo = video.cloneNode(true);
+                fullscreenVideo.controls = true;
+                fullscreenVideo.autoplay = true;
+                
+                // Add video to fullscreen container
+                fullscreenContainer.appendChild(fullscreenVideo);
+                document.body.appendChild(fullscreenContainer);
+                
+                // Play the video
+                fullscreenVideo.play();
+                
+                // Exit fullscreen when video ends or user clicks outside
+                fullscreenVideo.addEventListener('ended', exitFullscreen);
+                fullscreenVideo.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                fullscreenContainer.addEventListener('click', exitFullscreen);
+                
+                // Exit fullscreen with ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        exitFullscreen();
+                    }
+                });
+                
+                function exitFullscreen() {
+                    if (fullscreenContainer && fullscreenContainer.parentNode) {
+                        fullscreenContainer.remove();
+                    }
+                }
+            }
+        }
+
+        // Add some smooth scrolling and performance optimizations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preload images for better performance
+            const images = [
+                'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
+                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop',
+                'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=600&fit=crop',
+                'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&h=600&fit=crop'
+            ];
+            
+            images.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+        });
+    </script>
+</body>
+</html>
